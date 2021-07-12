@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bennu.cmp.repo.dao.ClassLessonExtraDao">
+  <resultMap id="ExtraResultMap" type="com.bennu.cmp.repo.dao.po.ClassLessonExtraPO">
+    <id column="id" jdbcType="BIGINT" property="classLessonPO.id" />
+    <result column="courseware_id" jdbcType="VARCHAR" property="coursewareId" />
+    <result column="courseware_version" jdbcType="VARCHAR" property="coursewareVersion" />
+    <result column="campus_id" jdbcType="VARCHAR" property="campusId" />
+    <result column="campus_name" jdbcType="VARCHAR" property="campusName" />
+    <result column="classroom_id" jdbcType="VARCHAR" property="classroomId" />
+    <result column="classroom_name" jdbcType="VARCHAR" property="classroomName" />
+    <association property="classLessonPO" javaType="com.bennu.cmp.repo.dao.po.ClassLessonPO" resultMap= "com.bennu.cmp.repo.dao.ClassLessonDao.BaseResultMap"/>
+  </resultMap>
+
+  <sql id="Extra_Column_List">
+    ${alias}.campus_id, ${alias}.campus_name, ${alias}.classroom_id, ${alias}.classroom_name
+  </sql>
+
+  <sql id="Courseware_Column_List">
+    ${alias}.courseware_id, ${alias}.courseware_version
+  </sql>
+
+  <select id="selectExtraByCondition" parameterType="com.bennu.cmp.repo.searchpara.ClassLessonExtraSearchPara"
+          resultType="com.bennu.cmp.repo.dao.po.ClassLessonExtraPO" resultMap="ExtraResultMap">
+    select
+    <include refid="com.bennu.cmp.repo.dao.ClassLessonDao.Base_Column_List">
+      <property name="alias" value="cl"/>
+    </include>,
+    <include refid="Extra_Column_List">
+      <property name="alias" value="class"/>
+    </include>,
+    <include refid="Courseware_Column_List">
+      <property name="alias" value="course_lesson"/>
+    </include>
+    from class_lesson cl left join class on cl.class_id = class.class_id left join course_lesson on class.course_id=course_lesson.course_id and cl.lesson_num = course_lesson.lesson_num
+    where 1 = 1
+    <if test="enterpriseId != null">
+      and cl.enterprise_id=#{enterpriseId}
+    </if>
+    <if test="classId != null">
+      and cl.class_id=#{classId}
+    </if>
+    <if test="lessonNum != null">
+      and cl.lesson_num=#{lessonNum}
+    </if>
+    <if test="teacherId != null">
+      and class.teacher_id=#{teacherId}
+    </if>
+    <if test="classroomId != null">
+      and class.classroom_id=#{classroomId}
+    </if>
+    <if test="coursewareId != null">
+      and course_lesson.courseware_id=#{coursewareId}
+    </if>
+    <if test="courseId != null">
+      and course_lesson.course_id=#{courseId}
+    </if>
+    <if test="maxEndDate != null">
+      and <![CDATA[cl.end_date >= #{maxEndDate,jdbcType=TIMESTAMP}]]>
+    </if>
+    <if test="startDate != null" >
+      and <![CDATA[cl.start_date >= #{startDate,jdbcType=TIMESTAMP}]]>
+    </if>
+    <if test="endDate != null" >
+      and <![CDATA[cl.end_date <= #{endDate,jdbcType=TIMESTAMP}]]>
+    </if>
+    order by cl.lesson_num asc
+  </select>
+
+</mapper>
